@@ -252,6 +252,26 @@
       </form>
     </div>
 
+    <div class="punch-form">
+      <div class="form-title">Punch Out</div>
+      <div id="punchOutMessage"></div>
+      <form id="punchOutForm">
+        <div class="form-row" style="align-items: flex-end; gap: 1rem;">
+          <div class="form-group">
+            <label for="punchOutEmployeeId">Employee ID</label>
+            <input type="text" id="punchOutEmployeeId" placeholder="e.g. EMP001" required>
+          </div>
+          <div class="form-group">
+            <label for="punchOutTime">Punch Out Time</label>
+            <input type="datetime-local" id="punchOutTime" required>
+          </div>
+          <div>
+            <button type="submit" id="punchOutBtn">Punch Out</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
     <div class="records-section">
       <div class="records-header">
         <span class="records-title">Punch Records</span>
@@ -263,7 +283,8 @@
             <tr>
               <th>ID</th>
               <th>Employee ID</th>
-              <th>Punch In Time</th>
+              <th>Punch In</th>
+              <th>Punch Out</th>
               <th>Recorded At</th>
             </tr>
           </thead>
@@ -304,6 +325,7 @@
             <td>${p.id}</td>
             <td>${escapeHtml(p.employeeId)}</td>
             <td>${escapeHtml(p.punchInTime)}</td>
+            <td>${escapeHtml(p.punchOutTime || '—')}</td>
             <td>${escapeHtml(p.createdAt || '—')}</td>
           </tr>
         `).join('');
@@ -323,8 +345,8 @@
       return div.innerHTML;
     }
 
-    function showFormMessage(msg, type) {
-      const el = document.getElementById('formMessage');
+    function showFormMessage(msg, type, elId = 'formMessage') {
+      const el = document.getElementById(elId);
       el.innerHTML = `<div class="${type}">${escapeHtml(msg)}</div>`;
       el.style.display = 'block';
       setTimeout(() => { el.innerHTML = ''; el.style.display = 'none'; }, 4000);
@@ -346,8 +368,9 @@
         const json = await res.json();
 
         if (json.success) {
-          showFormMessage('Punch recorded successfully.', 'success');
+          showFormMessage('Punch in recorded successfully.', 'success');
           document.getElementById('punchForm').reset();
+          document.getElementById('punchInTime').value = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
           loadPunches();
         } else {
           showFormMessage(json.error || 'Failed to punch in', 'error');
@@ -359,12 +382,46 @@
       }
     });
 
+    document.getElementById('punchOutForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('punchOutBtn');
+      const employeeId = document.getElementById('punchOutEmployeeId').value.trim();
+      const punchOutTime = document.getElementById('punchOutTime').value;
+
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${API}/punch-out`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ employeeId, punchOutTime }),
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          showFormMessage('Punch out recorded successfully.', 'success', 'punchOutMessage');
+          document.getElementById('punchOutForm').reset();
+          document.getElementById('punchOutTime').value = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+          loadPunches();
+        } else {
+          showFormMessage(json.error || 'Failed to punch out', 'error', 'punchOutMessage');
+        }
+      } catch (err) {
+        showFormMessage(err.message || 'Network error', 'error', 'punchOutMessage');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
     document.getElementById('refreshBtn').addEventListener('click', loadPunches);
 
     // Set default datetime to now
-    const now = new Date();
-    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-    document.getElementById('punchInTime').value = local.toISOString().slice(0, 16);
+    const setDefaultTime = () => {
+      const local = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000);
+      const val = local.toISOString().slice(0, 16);
+      document.getElementById('punchInTime').value = val;
+      document.getElementById('punchOutTime').value = val;
+    };
+    setDefaultTime();
 
     loadPunches();
   </script>
