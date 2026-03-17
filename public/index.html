@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance - Punch Records</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --surface: #18181c;
+      --border: #2a2a30;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --accent: #22d3ee;
+      --accent-dim: #0891b2;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+    }
+
+    .punch-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.15);
+    }
+
+    button {
+      padding: 0.65rem 1.25rem;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+
+    button:hover {
+      background: var(--accent-dim);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .records-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .records-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .records-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .refresh-btn {
+      background: transparent;
+      color: var(--accent);
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(34, 211, 238, 0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 0.9rem 1.25rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .empty-state {
+      padding: 3rem 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      opacity: 0.4;
+      margin-bottom: 1rem;
+    }
+
+    .error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .success {
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--accent);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 1rem; }
+      th, td { padding: 0.75rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Attendance</h1>
+      <p class="subtitle">View and record punch-in times</p>
+    </header>
+
+    <div class="punch-form">
+      <div class="form-title">Punch In</div>
+      <div id="formMessage"></div>
+      <form id="punchForm">
+        <div class="form-row" style="align-items: flex-end; gap: 1rem;">
+          <div class="form-group">
+            <label for="employeeId">Employee ID</label>
+            <input type="text" id="employeeId" placeholder="e.g. EMP001" required>
+          </div>
+          <div class="form-group">
+            <label for="punchInTime">Punch In Time</label>
+            <input type="datetime-local" id="punchInTime" required>
+          </div>
+          <div>
+            <button type="submit" id="submitBtn">Punch In</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="records-section">
+      <div class="records-header">
+        <span class="records-title">Punch Records</span>
+        <button type="button" class="refresh-btn" id="refreshBtn">↻ Refresh</button>
+      </div>
+      <div id="tableContainer">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Employee ID</th>
+              <th>Punch In Time</th>
+              <th>Recorded At</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p>No punch records yet. Add one above.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api';
+
+    async function loadPunches() {
+      try {
+        const res = await fetch(`${API}/punches`);
+        const json = await res.json();
+
+        if (!json.success) throw new Error(json.error || 'Failed to load');
+
+        const tbody = document.getElementById('recordsBody');
+        const emptyState = document.getElementById('emptyState');
+
+        if (!json.data?.length) {
+          tbody.innerHTML = '';
+          emptyState.style.display = 'block';
+          return;
+        }
+
+        emptyState.style.display = 'none';
+        tbody.innerHTML = json.data.map(p => `
+          <tr>
+            <td>${p.id}</td>
+            <td>${escapeHtml(p.employeeId)}</td>
+            <td>${escapeHtml(p.punchInTime)}</td>
+            <td>${escapeHtml(p.createdAt || '—')}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        document.getElementById('recordsBody').innerHTML = '';
+        document.getElementById('emptyState').innerHTML = `
+          <p style="color: #fca5a5;">Failed to load: ${escapeHtml(err.message)}</p>
+        `;
+        document.getElementById('emptyState').style.display = 'block';
+      }
+    }
+
+    function escapeHtml(str) {
+      if (str == null) return '—';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function showFormMessage(msg, type) {
+      const el = document.getElementById('formMessage');
+      el.innerHTML = `<div class="${type}">${escapeHtml(msg)}</div>`;
+      el.style.display = 'block';
+      setTimeout(() => { el.innerHTML = ''; el.style.display = 'none'; }, 4000);
+    }
+
+    document.getElementById('punchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const employeeId = document.getElementById('employeeId').value.trim();
+      const punchInTime = document.getElementById('punchInTime').value;
+
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${API}/punch`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ employeeId, punchInTime }),
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          showFormMessage('Punch recorded successfully.', 'success');
+          document.getElementById('punchForm').reset();
+          loadPunches();
+        } else {
+          showFormMessage(json.error || 'Failed to punch in', 'error');
+        }
+      } catch (err) {
+        showFormMessage(err.message || 'Network error', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', loadPunches);
+
+    // Set default datetime to now
+    const now = new Date();
+    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    document.getElementById('punchInTime').value = local.toISOString().slice(0, 16);
+
+    loadPunches();
+  </script>
+</body>
+</html>

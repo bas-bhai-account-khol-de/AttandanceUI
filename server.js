@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
 // Initialize SQLite database
 const dbPath = path.join(__dirname, 'attendance.db');
@@ -77,6 +78,7 @@ app.get('/api/punches', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Attendance API running at http://localhost:${PORT}`);
+  console.log(`UI: http://localhost:${PORT}`);
   console.log('POST /api/punch - Submit punch in (JSON: { employeeId, punchInTime })');
   console.log('GET  /api/punches - List all punch records');
 });
